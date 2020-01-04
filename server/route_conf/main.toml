@@ -1,0 +1,36 @@
+
+[http]
+  [http.routers]
+    [http.routers.code-server]
+      rule = "Host(`code.zenoscave.com`)"
+      middlewares = ["secured"]
+      service = "code-server"
+      [http.routers.code-server.tls]
+        certResolver = "le"
+    [http.routers.frontend]
+      rule = "Host(`auth.zenoscave.com`)"
+      middlewares = ["secured"]
+      service = "auth"
+      [http.routers.frontend.tls]
+        certResolver = "le"
+  [http.middlewares]
+    [http.middlewares.secured.chain]
+      middlewares = ["url-fix-authelia", "https-only", "test-auth"]
+    [http.middlewares.ssl-header.headers]
+      [http.middlewares.ssl-header.headers.customrequestheaders]
+         X-Forwarded-Proto = "https"
+    [http.middlewares.https-only.redirectScheme]
+      scheme = "https"
+    [http.middlewares.url-fix-authelia.redirectRegex]
+      regex = "(.*rd=https:/)([^/].+)"
+      replacement = "${1}/${2}"
+    [http.middlewares.test-auth.forwardAuth]
+      address = "http://authelia:9091/api/verify?rd=https://auth.zenoscave.com"
+      authResponseHeaders = ["X-Forwarded-Proto", "Remote-User", "Remote-Group"]
+  [http.services]
+    [http.services.code-server.loadBalancer]
+      [[http.services.code-server.loadBalancer.servers]]
+        url = "http://code-server"
+    [http.services.auth.loadBalancer]
+      [[http.services.auth.loadBalancer.servers]]
+        url = "http://authelia:9091"

@@ -1,0 +1,38 @@
+# traefik.toml
+################################################################
+# Global configuration
+################################################################
+
+debug = true
+logLevel = "ERROR"
+
+defaultEntryPoints = ["https", "web"]
+
+[entryPoints]
+  [entryPoints.web]
+    address = ":80"
+  [entryPoints.https]
+    address = ":443"
+	
+[certificatesResolvers.le.acme]
+  email = "lsmith@zenoscave.com"
+  storage = "acme/acme.json"
+  # used for testing acme
+  ## caServer = "https://acme-staging-v02.api.letsencrypt.org/directory"
+  # enable for tls acme challenge
+  ## [certificateResolvers.le.acme.tlsChallenge]
+  [certificatesResolvers.le.acme.httpChallenge]
+    # used during the challenge
+    entryPoint = "web"
+
+[providers]
+  [providers.docker]
+  
+  [providers.file]
+    watch = true
+    directory = "/etc/traefik/route_conf/"
+
+[api]
+  insecure = true
+
+[accessLog]

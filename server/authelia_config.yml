@@ -1,0 +1,47 @@
+host: 0.0.0.0
+port: 9091
+logs_level: info
+jwt_secret: change_me_unsecure_jwt_secret
+default_redirection_url: ${AUTH_SUBDOMAIN}.${DOMAIN_NAME}
+totp:
+  issuer: ${DOMAIN_NAME}
+authentication_backend:
+  ldap:
+    url: ldap://openldap
+    base_dn: dc=${DOMAIN_NAME_BASE},dc=${DOMAIN_NAME_TLD}
+    additional_users_dn: ou=users
+    users_filter: (cn={0})
+    additional_groups_dn: ou=groups
+    groups_filter: (&(member={dn})(objectclass=groupOfNames))
+    group_name_attribute: cn
+    mail_attribute: mail
+    user: cn=${LDAP_ADMIN},dc=${DOMAIN_NAME_BASE},dc=${DOMAIN_NAME_TLD}
+    password: ${LDAP_PASSWORD}
+access_control:
+  default_policy: "two_factor"
+  rules:
+    - domain: ${AUTH_SUBDOMAIN}.${DOMAIN_NAME}
+      policy: "bypass"
+session:
+  name: authelia_session
+  secret: change_me_unsecure_session_secret
+  expiration: 3600 # 3600 == 1 hour
+  inactivity: 600 # 600 == 10 minutes
+  domain: ${DOMAIN_NAME}
+  redis:
+    port: 6379
+    host: authelia_redis
+regulation:
+  max_retries: 3
+  find_time: 120
+  ban_time: 300
+storage:
+  local:
+    path: /var/lib/authelia/store
+notifier:
+  smtp:
+    username: ${SMTP_USER}@${DOMAIN_NAME}
+    password: ${SMTP_PASSWORD}
+    sender: ${SMTP_USER}@${DOMAIN_NAME}
+    host: ${SMTP_HOST}
+    port: ${SMTP_PORT}

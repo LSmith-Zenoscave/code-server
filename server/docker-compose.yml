@@ -1,0 +1,52 @@
+version: "3"
+
+services:
+  auth:
+    image: clems4ever/authelia:latest
+    container_name: authelia
+    volumes:
+      - ./authelia_config.yml:/etc/authelia/configuration.yml:ro
+      - authelia_storage:/var/lib/authelia
+      - authelia_notifier:/tmp/authelia
+    depends_on:
+      - redis
+      - openldap
+  redis:
+    container_name: authelia_redis
+    image: redis:5.0.7-alpine
+  openldap:
+    container_name: openldap
+    image: osixia/openldap:1.2.4
+    volumes:
+      - ldap_db:/var/lib/ldap
+      - ldap_config:/etc/ldap/slapd.d
+      - ./ldap/:/tmp/ldap/
+    environment:
+      LDAP_ORGANISATION: 'Zenoscave Inc'
+      LDAP_DOMAIN: ${DOMAIN_NAME}
+      LDAP_ADMIN_PASSWORD: ${LDAP_PASSWORD}
+      LDAP_CONFIG_PASSWORD: ${LDAP_CONFIG_PASSWORD}
+  traefik:
+    image: traefik:v2.0
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - ./traefik.toml:/etc/traefik/traefik.toml
+      - ./route_conf/:/etc/traefik/route_conf
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./acme/acme.json:/acme.json 
+  code-server:
+    image: zenoscave/docker-ide
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./route_conf:/route_conf
+    restart: unless-stopped
+volumes:
+  ldap_db:
+  ldap_config:
+  authelia_notifier:
+  authelia_storage:
+  projects:
+

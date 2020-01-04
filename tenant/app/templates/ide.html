@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome {{user_id}}</title>
+</head>
+
+<body>
+    {{ message|safe }}
+</body>
+<script>
+    function autorun() {
+        if ("{{ state }}" !== "READY") {
+            window.setInterval(() => window.location.reload(true), 5000);
+	    }
+    }
+    if (document.addEventListener) document.addEventListener("DOMContentLoaded", autorun, false);
+    else if (document.attachEvent) document.attachEvent("onreadystatechange", autorun);
+    else window.onload = autorun;
+</script>
+
+</html>
