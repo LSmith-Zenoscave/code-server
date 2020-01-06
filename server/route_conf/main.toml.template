@@ -2,13 +2,13 @@
 [http]
   [http.routers]
     [http.routers.code-server]
-      rule = "Host(`code.zenoscave.com`)"
+      rule = "Host(`${IDE_SUBDOMAIN}.${DOMAIN_NAME}`)"
       middlewares = ["secured"]
       service = "code-server"
       [http.routers.code-server.tls]
         certResolver = "le"
     [http.routers.frontend]
-      rule = "Host(`auth.zenoscave.com`)"
+      rule = "Host(`${AUTH_SUBDOMAIN}.${DOMAIN_NAME}`)"
       middlewares = ["secured"]
       service = "auth"
       [http.routers.frontend.tls]
@@ -25,7 +25,7 @@
       regex = "(.*rd=https:/)([^/].+)"
       replacement = "${1}/${2}"
     [http.middlewares.test-auth.forwardAuth]
-      address = "http://authelia:9091/api/verify?rd=https://auth.zenoscave.com"
+      address = "http://authelia:9091/api/verify?rd=https://${AUTH_SUBDOMAIN}.${DOMAIN_NAME}"
       authResponseHeaders = ["X-Forwarded-Proto", "Remote-User", "Remote-Group"]
   [http.services]
     [http.services.code-server.loadBalancer]

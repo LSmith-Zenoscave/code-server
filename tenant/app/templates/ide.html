@@ -12,7 +12,7 @@
 <script>
     function autorun() {
         if ("{{ state }}" !== "READY") {
-            window.setInterval(() => window.location.reload(true), 5000);
+            window.setTimeout(() => window.location.reload(true), 5000);
 	    }
     }
     if (document.addEventListener) document.addEventListener("DOMContentLoaded", autorun, false);

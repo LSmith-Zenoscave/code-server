@@ -1,5 +1,9 @@
 ldap/*.ldif
 route_conf/*.toml
-!route_conf/main.toml
 acme/*
 !acme/.gitkeep
+.env
+add_user.sh
+authelia_config.yml
+docker-compose.yml
+traefik.toml

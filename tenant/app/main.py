@@ -6,10 +6,13 @@ from starlette.background import BackgroundTask
 
 from io import BytesIO
 
+import os
 import docker
 import asyncio
 import logging
 
+host = f'{os.environ["IDE_SUBDOMAIN"]}.{os.environ["DOMAIN_NAME"]}'
+docker_network = f"{os.environ['COMPOSE_PROJECT_NAME']}_default"
 templates = Jinja2Templates(directory="templates")
 app = Starlette(debug=True)
 
@@ -38,12 +41,11 @@ async def ide(request):
 
 async def start_code_server(user_id):
     code_name = f'code-{user_id}'
-
     conf = f"""
 [http]
   [http.routers]
     [http.routers.{user_id}]
-      rule = "Host(`code.zenoscave.com`) && HeadersRegexp(`cookie`, `.*remote-user={user_id}.*`)"
+      rule = "Host(`{host}`) && HeadersRegexp(`cookie`, `.*remote-user={user_id}.*`)"
       middlewares = ["secured", "ssl-header"]
       service = "code-server-{user_id}"
       [http.routers.{user_id}.tls]
@@ -73,7 +75,7 @@ async def start_code_server(user_id):
         volume = client.volumes.create(code_name)
     image = client.images.build(
         path='./coder',
-        tag=f'zenoscave/{code_name}',
+        tag=f'code_server/{code_name}',
         pull=True,
         forcerm=True,
         nocache=True,
@@ -83,18 +85,15 @@ async def start_code_server(user_id):
     )
 
     container = client.containers.run(
-        f"zenoscave/{code_name}",
+        f"code_server/{code_name}",
         name=code_name,
         detach=True,
         command=["--auth", "none"],
         volumes={code_name: {'bind': f'/home/{user_id}/project', 'mode': 'rw'}},
-        network="zenoscave_default",
+        network=docker_network,
     )
 
     cids = [c.id for c in client.containers.list()]
     while container.id not in cids:
-        print(cids)
         cids = [c.id for c in client.containers.list()]
         await asyncio.sleep(3.0)
-
-    print(container.id)
