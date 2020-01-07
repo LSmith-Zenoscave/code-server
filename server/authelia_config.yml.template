@@ -1,13 +1,13 @@
 host: 0.0.0.0
 port: 9091
-logs_level: info
+logs_level: debug
 jwt_secret: change_me_unsecure_jwt_secret
 default_redirection_url: ${AUTH_SUBDOMAIN}.${DOMAIN_NAME}
 totp:
   issuer: ${DOMAIN_NAME}
 authentication_backend:
   ldap:
-    url: ldap://openldap
+    url: ldap://${COMPOSE_PROJECT_NAME}_openldap_1
     base_dn: dc=${DOMAIN_NAME_BASE},dc=${DOMAIN_NAME_TLD}
     additional_users_dn: ou=users
     users_filter: (cn={0})
@@ -16,12 +16,14 @@ authentication_backend:
     group_name_attribute: cn
     mail_attribute: mail
     user: cn=${LDAP_ADMIN},dc=${DOMAIN_NAME_BASE},dc=${DOMAIN_NAME_TLD}
-    password: ${LDAP_PASSWORD}
+    password: ${LDAP_ADMIN_PASSWORD}
 access_control:
   default_policy: "two_factor"
   rules:
     - domain: ${AUTH_SUBDOMAIN}.${DOMAIN_NAME}
       policy: "bypass"
+    - domain: ${IDE_SUBDOMAIN}.${DOMAIN_NAME}
+      policy: "two_factor"  
 session:
   name: authelia_session
   secret: change_me_unsecure_session_secret
@@ -30,7 +32,7 @@ session:
   domain: ${DOMAIN_NAME}
   redis:
     port: 6379
-    host: authelia_redis
+    host: ${COMPOSE_PROJECT_NAME}_redis_1
 regulation:
   max_retries: 3
   find_time: 120
@@ -40,8 +42,8 @@ storage:
     path: /var/lib/authelia/store
 notifier:
   smtp:
-    username: ${SMTP_USER}@${DOMAIN_NAME}
+    username: ${SMTP_USER_EMAIL}
     password: ${SMTP_PASSWORD}
-    sender: ${SMTP_USER}@${DOMAIN_NAME}
+    sender: ${SMTP_USER_EMAIL}
     host: ${SMTP_HOST}
     port: ${SMTP_PORT}

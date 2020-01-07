@@ -33,14 +33,17 @@ services:
       - ./traefik.toml:/etc/traefik/traefik.toml
       - ./route_conf/:/etc/traefik/route_conf
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./acme/acme.json:/acme.json 
+      - ./acme:/acme
   code-server:
     image: zenoscave/docker-ide
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./route_conf:/route_conf
     restart: unless-stopped
-    env_file: ./.env
+    environment:
+      IDE_SUBDOMAIN: ${IDE_SUBDOMAIN}
+      DOMAIN_NAME: ${DOMAIN_NAME}
+      COMPOSE_PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
 volumes:
   ldap_db:
   ldap_config:

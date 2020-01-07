@@ -11,7 +11,7 @@ import docker
 import asyncio
 import logging
 
-host = f'{os.environ["IDE_SUBDOMAIN"]}.{os.environ["DOMAIN_NAME"]}'
+host = os.environ["IDE_SUBDOMAIN"] + "." + os.environ["DOMAIN_NAME"]
 docker_network = f"{os.environ['COMPOSE_PROJECT_NAME']}_default"
 templates = Jinja2Templates(directory="templates")
 app = Starlette(debug=True)

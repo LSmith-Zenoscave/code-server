@@ -5,4 +5,4 @@ docker-compose exec openldap /bin/bash -c \
         \"cn=${LDAP_ADMIN},dc=${DOMAIN_NAME_BASE},dc=${DOMAIN_NAME_TLD}\" \
         -w ${LDAP_ADMIN_PASSWORD} \
         -f /tmp/ldap/*.ldif \
-        -H ldap://openldap"
+        -H ldap://${COMPOSE_PROJECT_NAME}_openldap_1"
